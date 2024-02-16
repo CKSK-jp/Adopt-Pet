@@ -26,57 +26,56 @@ def home_page():
 @app.route("/add", methods=["GET", "POST"])
 def add_pet_form():
     """
-    Display and process the form for adding a new pet.
-
-    Returns:
-        If the form is successfully submitted, adds the new pet to the database
-        and redirects to the home page. Otherwise, renders the add pet form template.
+    Render the add pet form and handle form submission.
+    If the form is submitted, add the new pet to the database.
     """
     form = AddPetForm()
 
-    if form.validate_on_submit():
-        # Extract data from the form and create a new Pet object
-        data = {k: v for k, v in form.data.items() if k != "csrf_token"}
-        new_pet = Pet(**data)
+    if request.method == "POST":
+        if form.validate_on_submit() and "csrf_token" in form.data:
+            new_pet_data = {
+                key: value for key, value in form.data.items() if key != "csrf_token"
+            }
+            new_pet = Pet(**new_pet_data)
+            db.session.add(new_pet)
+            db.session.commit()
+            flash(f"{new_pet.name} added.", category="success")
+            return redirect(url_for("home_page"))
+        else:
+            flash(f"Error adding pet: {form.errors}", category="error")
+            return render_template("add_pet_form.html", form=form)
 
-        # Add the new pet to the database and commit the transaction
-        db.session.add(new_pet)
-        db.session.commit()
-
-        # Flash a message and redirect to the home page
-        flash(f"{new_pet.name} added.")
-        return redirect(url_for("home_page"))
-    else:
-        # Render the add pet form template
-        return render_template("add_pet_form.html", form=form)
+    return render_template("add_pet_form.html", form=form)
 
 
-@app.route("/edit", methods=["GET", "POST"])
-def edit_pet_form():
+@app.route("/display/<int:pet_id>")
+def display_pet(pet_id):
+    pet = Pet.query.get_or_404(pet_id)
+    return render_template("display_pet.html", pet=pet)
+
+
+@app.route("/edit/<int:pet_id>", methods=["GET", "POST"])
+def edit_pet_form(pet_id):
     """
-    Display and process the form for editing a pet.
-
+    Render the form for editing a pet's information and process the form submission.
+    Args:
+        pet_id (int): The ID of the pet to edit.
     Returns:
-        If the form is successfully submitted, updates the pet in the database
-        and redirects to the home page. Otherwise, renders the edit pet form template.
+        rendered template: The form for editing a pet's information or a redirect after form submission.
     """
-    form = EditPetForm()
+    pet = Pet.query.get_or_404(pet_id)
+    form = EditPetForm(obj=pet)
 
-    if form.validate_on_submit():
-        # Extract data from the form and update the pet in the database
-        data = {k: v for k, v in form.data.items() if k != "csrf_token"}
-        pet = Pet.query.get(data["id"])
-        pet.update(**data)
-
-        # Commit the transaction
-        db.session.commit()
-
-        # Flash a message and redirect to the home page
-        flash(f"{pet.name} updated.")
-        return redirect(url_for("home_page"))
-    else:
-        # Render the edit pet form template
-        return render_template("edit_pet_form.html", form=form)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            form.populate_obj(pet)
+            db.session.commit()
+            flash(f"{pet.name} updated.", category="success")
+            return redirect(url_for("display_pet", pet_id=pet.id))
+        else:
+            flash(f"{pet.name} not updated.", category="error")
+            return render_template("edit_pet_form.html", form=form)
+    return render_template("edit_pet_form.html", form=form)
 
 
 if __name__ == "__main__":

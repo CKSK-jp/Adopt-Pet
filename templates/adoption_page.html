@@ -18,8 +18,9 @@
       <img src="{{ pet.photo_url }}" alt="{{ pet.name }}" class="pet-image">
       <div class="pet-info">
         <p class="availability">{{ pet.name }} is {{ "available!" if pet.available else "no longer available :(" }}</p>
-        <a href="/edit" class="edit-button btn-tertiary no-underline">Edit </a>
-
+        <div class="buttons">
+          <a href="/display/{{ pet.id }}" class="edit-button btn-tertiary no-underline">View </a>
+        </div>
       </div>
     </div>
     {% endfor %}
