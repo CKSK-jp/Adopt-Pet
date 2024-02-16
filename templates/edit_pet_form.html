@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="item-container">
+  <h1>Edit Pet</h1>
+
+  <form for="edit-pet" method="POST">
+    {% include "_form.html" %}
+    <a class="cancel-button btn-secondary no-underline" href="{{ url_for('home_page') }}">Cancel</a>
+    <button class="add-button btn-primary" type="submit">Add</button>
+  </form>
+</div>
+
+{% endblock %}

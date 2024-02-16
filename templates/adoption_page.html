@@ -5,35 +5,43 @@
 {% block navbar %}
 <ul>
   <li><a href="/" class="nav-item">Home</a></li>
-  <li><a href="/users" class="nav-item">Users</a></li>
 </ul>
 {% endblock %}
 
 {% block content %}
-<div id="form-container" class="item-container">
-  <h1>{{ action }} Tag</h1>
-  <form id="surveyForm" method="POST" action="/tags/{{ route }}">
-    <div class="form-group">
-      <label for="tag-name">Name</label>
-      {% if tag %}
-      <input type="text" name="tag-name" value="{{ tag.name }}" required>
-      {% else %}
-      <input type="text" name="tag-name" placeholder="Enter a name for the tag" required>
-      {% endif %}
+<div id="pets-container" class="item-container">
+  <h1>Pets</h1>
 
-      <div class="button-container">
-        <a href="/tags" class="cancel-button">Cancel</a>
-        <button type="submit" class="{{ btn_class }}">{{ btn_name }}</button>
+  <div id="pet-listings">
+    {% for pet in pets %}
+    <div class="pet-card">
+      <img src="{{ pet.photo_url }}" alt="{{ pet.name }}" class="pet-image">
+      <div class="pet-info">
+        <p class="availability">{{ pet.name }} is {{ "available!" if pet.available else "no longer available :(" }}</p>
+        <a href="/edit" class="edit-button btn-tertiary no-underline">Edit </a>
+
       </div>
     </div>
-  </form>
-
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% for category, message in messages %}
-  <div class="flash-message {{ category }}">
-    {{ message }}
+    {% endfor %}
   </div>
-  {% endfor %}
-  {% endwith %}
+
+  <div id="menu-items">
+    {% if not pets %}
+    <p>No pets found.</p>
+    {% endif %}
+
+    <a href="/add" class="add-button btn-primary no-underline">Add Pet</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="flash-message {{ category }}">
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endwith %}
+  </div>
+
 </div>
+
+
 {% endblock %}
